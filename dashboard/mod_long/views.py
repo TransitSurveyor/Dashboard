@@ -6,7 +6,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import aliased
 from geoalchemy2 import functions as geofunc
 
-from dashboard import db, Session, debug, error
+from dashboard import Session, debug, error
 from ..shared.models import Stops, Routes, SurveysCore, SurveysFlag
 from ..shared.helper import Helper
 

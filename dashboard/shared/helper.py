@@ -1,11 +1,9 @@
 import csv, os
 
 from sqlalchemy import func, desc, distinct, cast, Integer
-
 from flask import current_app
-from dashboard import db
-from dashboard import Session
-from dashboard import debug
+
+from dashboard import Session, debug
 
 app = current_app
 
