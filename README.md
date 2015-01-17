@@ -8,7 +8,7 @@ cd Dashboard
 
 # create virtual environment and install python requirments
 virtualenv env
-env/bin/pip install -r requirments.txt
+env/bin/pip install -r requirements.txt
 
 # rename and edit config file for your environments settings
 mv example_config.py config.py
