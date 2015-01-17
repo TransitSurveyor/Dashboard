@@ -15,7 +15,12 @@ env/bin/pip install -r requirements.txt
 # copy and edit example config file for your environments settings
 # project uses 'config.py' as default config file
 cp example_config.py config.py
+
 ```
 
 
+#### Deploying on Apache with mod_wsgi
 
+1. create wsgi file
+2. create virtual host
+3. make wsgi file visible to apache user
