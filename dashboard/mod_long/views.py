@@ -1,18 +1,15 @@
 import os, sys, json
+from decimal import Decimal
 
 from flask import Blueprint, redirect, url_for,render_template, jsonify, request
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
 from geoalchemy2 import functions as geofunc
 
-from api import db
-from api import Session
-from api import debug
-
+from dashboard import db, Session, debug, error
 from ..shared.models import Stops, Routes, SurveysCore, SurveysFlag
 from ..shared.helper import Helper
 
-from decimal import Decimal
 
 STATIC_DIR = '/long'
 mod_long = Blueprint('long', __name__, url_prefix='/long')

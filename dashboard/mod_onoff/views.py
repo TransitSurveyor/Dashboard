@@ -10,9 +10,9 @@ from sqlalchemy import func
 
 from models import Scans, OnOffPairs_Scans, OnOffPairs_Stops
 from helper import Helper
-from spatial import Spatial
-from api import app, db
-from api import debug, error, Session
+#from spatial import Spatial
+from dashboard import app, db
+from dashboard import debug, error, Session
 from ..shared.helper import Helper as h
 
 STATIC_DIR = '/onoff'

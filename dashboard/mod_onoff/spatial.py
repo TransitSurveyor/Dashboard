@@ -2,9 +2,9 @@ import os
 import json
 
 from flask import current_app
-from api import db
-from api import Session
-from api import debug
+from dashboard import db
+from dashboard import Session
+from dashboard import debug
 
 app = current_app
 

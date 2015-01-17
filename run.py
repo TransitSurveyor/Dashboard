@@ -1,3 +1,3 @@
 #!env/bin/python
-from api import app
+from dashboard import app
 app.run(debug = True)

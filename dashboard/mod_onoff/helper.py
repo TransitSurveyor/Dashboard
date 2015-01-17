@@ -1,12 +1,11 @@
 import csv, os
 
 from sqlalchemy import func, desc, distinct, cast, Integer
-
 from flask import current_app
-#from api.shared.models import Scans, OnOffPairs_Scans, OnOffPairs_Stops
-from api import db
-from api import Session
-from api import debug
+
+from dashboard import db
+from dashboard import Session
+from dashboard import debug
 
 app = current_app
 
