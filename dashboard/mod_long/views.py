@@ -7,8 +7,7 @@ from sqlalchemy.orm import aliased
 from geoalchemy2 import functions as geofunc
 
 from dashboard import Session, debug, error
-from ..shared.models import Stops, SurveysCore
-#from ..shared.models import Stops, Routes, SurveysCore, #SurveysFlag
+from ..shared.models import Stops, SurveysCore, CallbackFlag as CFlag
 from ..shared.helper import Helper
 
 import fields as F
@@ -91,40 +90,63 @@ def geo_query():
 
 @mod_long.route('/callback')
 def callback():
-    data = []
+    callbacks = []
     headers = [
         "Save", "Status", "Date", "Time", "Route", "Direction",
         "Name", "Number", "Call Time", "Spanish", "Comment"]
     session = Session()
-    query = session.query(
-        SurveysCore.uri,
-        SurveysCore.srv_date,
-        SurveysCore.start_time,
-        SurveysCore.rte,
-        SurveysCore.dir,
-        SurveysCore.call_name,
-        SurveysCore.call_number,
-        SurveysCore.call_time,
-        SurveysCore.call_spanish,
-        SurveysCore.call_comment
-    ).order_by(SurveysCore.srv_date, SurveysCore.start_time)\
-    .filter(SurveysCore.call_number != None)
-
-    callbacks = []
+    fields = session.execute("""
+        SELECT ordinal_position, column_name
+        FROM information_schema.columns
+        WHERE table_schema = 'web' AND table_name   = 'calls'
+        ORDER BY ordinal_position;""")
+    fields = [ f[1] for f in fields ]
+    query = session.execute("SELECT * FROM web.calls;")
     for record in query:
-        #debug(record)
-        callbacks.append({
-            "uri":record.uri,
-            "date":record.srv_date,
-            "time":record.start_time,
-            "rte":record.rte,
-            "dir":record.dir,
-            "name":record.call_name,
-            "number":record.call_number,
-            "calltime":record.call_time,
-            "comment":record.call_comment,
-            "spanish":record.call_spanish
-        })
+        data = {}
+        for index, field in enumerate(fields):
+            data[field] = record[index]
+        callbacks.append(data) 
+   
+    debug(data)
+    session.close() 
+    #query = session.query(
+    #    SurveysCore.uri,
+    #    SurveysCore.srv_date,
+    #    SurveysCore.start_time,
+    #    SurveysCore.rte,
+    #    SurveysCore.dir,
+    #    SurveysCore.call_name,
+    #    SurveysCore.call_number,
+    #    SurveysCore.call_time,
+    #    SurveysCore.call_spanish,
+    #    SurveysCore.call_comment,
+    #    CFlag.flag
+    #).order_by(SurveysCore.srv_date, SurveysCore.start_time)\
+    #.join(CFlag.parent).filter(CFlag.flag == 0)
+
+    #callbacks = []
+    #for record in query:
+    #    debug(record.flag)
+    #    time = ''
+    #    call_time = ''
+    #    if record.start_time: time = record.start_time.strftime("%I:%M %p")
+    #    if record.call_time:
+    #        call_time = record.call_time.strftime("%I:%M %p")
+    #        if call_time == '12:00 PM': call_time = ''
+    #    callbacks.append({
+    #        "uri":record.uri,
+    #        "date":record.srv_date,
+    #        "time":time,
+    #        "rte":record.rte,
+    #        "dir":record.dir,
+    #        "name":record.call_name,
+    #        "number":record.call_number,
+    #        "calltime":call_time,
+    #        "comment":record.call_comment,
+    #        "spanish":record.call_spanish
+    #    })
+    
     session.close()
     return render_template(
         static('callback.html'),
@@ -178,10 +200,12 @@ def viewer():
     callbacks = []
     for record in query:
         #debug(record)
+        time = None
+        if record.start_time: time = record.start_time.strftime("%I:%M %p")
         callbacks.append({
             "uri":record.uri,
             "date":record.srv_date,
-            "time":record.start_time,
+            "time":time,
             "user":record.user_id,
             "rte":record.rte,
             "dir":record.dir
@@ -198,76 +222,45 @@ def survey_data():
     if 'uri' in request.args:
         uri = request.args.get('uri')
         session = Session()
-        fields_res = session.execute("""
+        fields = session.execute("""
             SELECT ordinal_position, column_name
             FROM information_schema.columns
             WHERE table_schema = 'web' AND table_name   = 'callback'
             ORDER BY ordinal_position;""")
-        fields = [ f[1] for f in fields_res ]
-        
-        select = ""
-        for index, field in enumerate(fields):
-            if index != len(field) - 2:
-                select += field + ", "
-            else:
-                select += field
-        debug(select)
-        query = session.execute("""
+        survey = session.execute("""
             SELECT * FROM web.callback
-            WHERE uri = :uri;""", {"uri":uri})
-        for record in query:
+            WHERE uri = :uri;""", {"uri":uri}).first()
+        if survey:
+            fields = [ f[1] for f in fields ]
             for index, field in enumerate(fields):
-                value = convert_val(index, record[index])
+                value = convert_val(index, survey[index])
                 data.append({"field":field, "value":value})
         session.close()
     return jsonify({'data':data})
 
+
+@mod_long.route('/_update_callback', methods=['POST'])
+def update_callback():
+    response = {}
+    if 'uri' in request.form and 'flag' in request.form:
+        uri = request.form['uri']
+        flag = request.form['flag']
+        debug(uri)
+        debug(flag)
+        session = Session()
+        session.query(CFlag).filter_by(uri = uri).update({"flag":flag})
+        session.commit()
+        session.close()
+    return jsonify(res=response)
+
+
 """
-def transfers(query):
-    before = 0
-    after = 0
-    before_rte = []
-    after_rte = []
-
-    
-    if query and query.transfers_before and query.transfers_after:
-        before = int(query.transfers_before)
-        after = int(query.transfers_after)
-
-        if before > 0:
-            before_rte.append(query.tb_1)
-            if before > 1:
-                before_rte.append(query.tb_2)
-                if before > 2:
-                    before_rte.append(query.tb_3)
-        
-        if after > 0:
-            after_rte.append(query.ta_1)
-            if after > 1:
-                after_rte.append(query.ta_2)
-                if after > 2:
-                    after_rte.append(query.ta_3)
-    
     rtes = []
-    print "before"
-    for rte in before_rte:
-        print rte
-        geom = db.session.query(
-            func.ST_AsGeoJSON(func.ST_Transform(func.ST_Union(Routes.geom), 4326))
-            .label('geom')).filter(Routes.rte == before_rte[0]).first()
-        rtes.append(json.loads(geom.geom))
-        #for g in geom:
-        #    rtes.append(json.loads(g.geom))
-    print "after"
-    for rte in after_rte:
-        print rte
-        geom = db.session.query(
-            func.ST_AsGeoJSON(func.ST_Transform(func.ST_Union(Routes.geom), 4326))
-            .label('geom')).filter(Routes.rte == before_rte[0]).first()
-        rtes.append(json.loads(geom.geom))
-        #for g in geom:
-        #    rtes.append(json.loads(g.geom))
-
+    geom = db.session.query(
+        func.ST_AsGeoJSON(func.ST_Transform(func.ST_Union(Routes.geom), 4326))
+        .label('geom')).filter(Routes.rte == before_rte[0]).first()
+    for g in geom:
+        rtes.append(json.loads(g.geom))
 """
 
 

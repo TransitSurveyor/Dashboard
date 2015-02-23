@@ -291,25 +291,30 @@ class SurveysCore(Base):
         return '<Survey: uri:%r, rte:%r, dir:%r>' % \
             (self.uri, self.user_id, elf.rte, self.dir)
 
-#class SurveysFlag(Base):
-#    __tablename__ = 'survey_flags'
-#    uri = Column(String, primary_key=True)
-#    english = Column(Boolean)
-#    locations = Column(Boolean)
-#    valid_count = Column(Integer)
+class SurveysFlag(Base):
+    __tablename__ = 'flags'
+    __table_args__ = {"schema":"odk"}
+    uri = Column(String, primary_key=True)
+    english = Column(Boolean)
+    loc = Column(Boolean)
+    count = Column(Integer)
 
+class CallbackFlag(Base):
+    __tablename__ = 'callback_flags'
+    __table_args__ = {"schema":"odk"}
+    uri = Column(String, ForeignKey("odk.survey.uri"), primary_key=True)
+    flag = Column(Integer)
+    parent = relationship("SurveysCore", foreign_keys=uri)
 
-"""
+    #off_stop = Column(Integer, ForeignKey("tm_route_stops.gid"), nullable=False)
+    #on = relationship("Stops", foreign_keys=on_stop)
+
 class SurveysLng(Base):
-    __tablename__ = 'tri_met_pilot_other_lngs'
+    __tablename__ = 'lng'
+    __table_args__ = {"schema":"odk"}
     uri = Column(String, primary_key = True)
-    parent_uri = Column(String, ForeignKey("tri_met_pilot_core.uri"), nullable=False)
-    parent = relationship("SurveysCore", foreign_keys=parent_uri)
-    value = Column(Text)
+    survey_uri = Column(String)
+    choice = Column(Text)
 
-    def __init__(self, **kwargs):
-        self.uri = kwargs[cons.URI]
-        self.parent_uri = kwargs[cons.PARENT_URI]
-        self.value = kwargs[cons.VALUE]
-"""
+
 

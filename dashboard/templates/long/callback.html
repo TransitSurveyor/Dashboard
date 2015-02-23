@@ -10,7 +10,9 @@
 
 {% block dashboard %}
 
-{{ super() }}
+<h3 class="page-header">Callbacks</h3>
+
+
 <div class="row-fluid">
   <div class="col-md-12"> 
     <div class="table-responsive panel panel-default">
@@ -39,25 +41,27 @@
       data-toggle="dropdown">&nbsp;<span class="caret"></span>
   </button>
   <ul class="status-dropdown dropdown-menu scrollable-menu" role="menu">
-    <li><a href="#">&nbsp;</a></li>
-    <li><a href="#">Call</a></li>
+    <li role="presentation"><a href="#">View</a></li>
+    <li role="presentation" class="divider"></li>
+    <li role="presentation" class="dropdown-header">Actions</li>
+    <li><a href="#">Incomplete</a></li>
     <li><a href="#">Completed</a></li>
     <li><a href="#">No Answer</a></li>
     <li><a href="#">Declined</a></li>
     <li><a href="#">Bad Number</a></li>
-    <li><a href="#">Delete</a></li>
+    <li><a href="#">Remove (Other)</a></li>
   </ul>
 </div>
           </td>
-          <td>{{ callback["date"] }}</td>
-          <td>{{ callback["time"] }}</td>
-          <td>{{ callback["rte"] }}</td>
-          <td>{{ callback["dir"] }}</td>
-          <td>{{ callback["name"] }}</td>
-          <td>{{ callback["number"] }}</td>
-          <td>{{ callback["calltime"] }}</td>
-          <td>{{ callback["spanish"] }}</td>
-          <td>{{ callback["comment"] }}</td>
+          <td>{{ callback["srv_date"] }}</td>
+          <td>{{ callback["start_time"] }}</td>
+          <td>{{ callback["rte_desc"] }}</td>
+          <td>{{ callback["dir_desc"] }}</td>
+          <td>{{ callback["call_name"] }}</td>
+          <td>{{ callback["call_number"] }}</td>
+          <td>{{ callback["call_time"] }}</td>
+          <td>{{ callback["call_spanish"] }}</td>
+          <td>{{ callback["call_comment"] }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -103,6 +107,8 @@
       </tbody>
       </table>
     </div>
+  </div>  
+  <div class="col-md-4">
     <div class="table-responsive panel panel-default">
       <table class="table table-striped">
       <thead id="thead-tm">
@@ -114,6 +120,8 @@
       </tbody>
       </table>
     </div>
+  </div>    
+  <div class="col-md-4">
     <div class="table-responsive panel panel-default">
       <table class="table table-striped">
       <thead id="thead-survey">
@@ -126,96 +134,152 @@
       </table>
     </div>
   </div>
-  <div class="col-md-8">
+</div>
+
+<div class="row-fluid">  
+  <div class="col-md-12">
     <div id="map" style="width: auto; display:block; height:80vh"></div>
   </div>
 </div>
 
 
 <script>
-var map = initBasicMap('map');
-var points = L.geoJson().addTo(map);
 
+function reset_button(cur_btn) {
+    $('.status-group').each(function(index, item) {
+        var btn = $(item).find(".status-button");
+        if (!cur_btn.is(btn)) {
+            btn.text(" ").append('<span class="caret"></span>');
+        }
+    });
+}
 
-$('.status-dropdown').each(function(index, item) {
-    var button = $(item).parent().find(".status-button");
-    $(item).find("a").each(function (index, item) {
-        $(item).on('click', function() {
-            // set button text with option is selected from dropdown list
-            button.text(item.text+" ").append('<span class="caret"></span>');
-            var row = $(item).parents().eq(4); //.parent().parent().parent().parent();
+function clear_tables() {
+    $('tbody').each(function() {
+        if($(this).attr('id').match(/response-body-.*/)) {
+            $(this).empty();    
+        }
+    });
+}
+
+function get_table(index) {
+    var table = null;
+    if(index ==  7 || index == 8) table = $("#response-body-gen");
+    else if(index >= 9 && index <= 14) table = $("#response-body-orig");
+    else if(index >= 15 && index <= 20) table = $("#response-body-dest");
+    else if(index >= 21 && index <= 29) table = $("#response-body-tm");
+    else if(index >= 30 && index <= 46) table = $("#response-body-survey");
+    return table;
+}
+
+function flagpick_listener(btn, item) {
+    btn.text(item.text+" ").append('<span class="caret"></span>');
+    var row = $(item).parents().eq(4);
+    var uri = row.attr("uri");
+    if(item.text == "View" && current.uri == uri) {
+        current.action = item.text;
+        return;
+    }
+    if(item.text == "View") {
+        $.getJSON("_survey", { uri:uri }, function(data, textStatus) {
+            var table = null;
             $('tbody').each(function(){
                 if($(this).attr('id').match(/response-body-.*/)) {
                     $(this).empty();    
                 }
             });
-            //if(item.text == "&nbsp;") {
-            //    console.log("empty");
-           // }
-            if(item.text == "Call") {
-                var uri = row.attr("uri");
-                console.log(uri);
-                $.getJSON("_survey", { uri:uri }, function(data, textStatus) {
-                    //$("#response-body-
-                    var table = null;
-                    $('tbody').each(function(){
-                        if($(this).attr('id').match(/response-body-.*/)) {
-                            $(this).empty();    
-                        }
-                    });
-                    points.clearLayers();
-                    var newPoints = 0;
-                    $(data.data).each(function(index, item) {
-                        var table = null;
-                        if(index >= 1 && index <= 4) {
-                            try {
-                                points.addData(JSON.parse(item.value));
-                                newPoints++;
-                            }
-                            catch(err) {}
-                        }
-                        else if (index >= 7) {
-                            if(index ==  7 || index == 8) {
-                                table = $("#response-body-gen");
-                            }
-                            else if(index >= 9 && index <= 14) {
-                                table = $("#response-body-orig");
-                            }
-                            else if(index >= 15 && index <= 20) {
-                                table = $("#response-body-dest");
-                            }   
-                            else if(index >= 21 && index <= 29) {
-                                table = $("#response-body-tm");
-                            }
-                            else if(index >= 30 && index <= 46) {
-                                table = $("#response-body-survey");
-                            } 
-                            if (table != null) {
-                                var row = $("<tr>");
-                                row.append($("<td>").text(item.field));
-                                row.append($("<td>").text(item.value));
-                                table.append(row);
-                            }
-                        }
-                    });
-                    if(newPoints > 0) {
-                        map.fitBounds(points.getBounds().pad(0.15));
+            clear_tables();
+            points.clearLayers();
+            var newPoints = 0;
+            $(data.data).each(function(index, record) {
+                var table = null;
+                if(index >= 1 && index <= 4) {
+                    try {
+                        points.addData(JSON.parse(record.value));
+                        newPoints++;
                     }
-                });
-            } 
-            
+                    catch(err) {}
+                }
+                else if (index >= 7) {
+                    table = get_table(index);
+                    if (table != null) {
+                        var row = $("<tr>");
+                        row.append($("<td>").text(record.field));
+                        row.append($("<td>").text(record.value));
+                        table.append(row);
+                    }
+                }
+            });
+            if(newPoints > 0) {
+                map.fitBounds(points.getBounds().pad(0.15));
+            }
+        });
+    }
+    current.uri = uri;
+    current.action = item.text;
+}
+
+var map = initBasicMap('map');
+var points = L.geoJson().addTo(map);
+var current = {uri:null, action:null};
+
+$('.status-dropdown').each(function(index, item) {
+    var button = $(item).parent().find(".status-button");
+    $(item).find("a").each(function (index, a) {
+        $(a).on('click', function() {
+            reset_button(button);
+            flagpick_listener(button, a);  
         });
     });
-    
-    //$(item).on('click', function() {
-    //    console.log("hello");
-    //});
-});    
-    //var choice = this.text;
-    //console.log(choice);
-    //console.log($(this).parents().eq(2).child().text);
+});
 
-    //.text(this.text+' ').append('<span class="caret"></span>');
+function get_flag(action) {
+    switch(action) {
+        case "Incomplete": return 0;
+        case "Completed": return 1;
+        case "No Answer": return 2;
+        case "Declined": return 3;
+        case "Bad Number": return 4;
+        case "Remove (Other)": return 5;
+        default: return null;      
+    }
+}
+
+function update_flag(uri, action) {
+    var flag = get_flag(action); 
+    console.log(action);
+    console.log(flag);    
+    
+    if(action == "Incomplete") return;
+    var c = confirm("mark survey as " + action.toUpperCase());
+    if (c == true) {
+        $.post("_update_callback", {"uri":uri, "flag":flag}, function(data, success) {
+            console.log(success);
+            console.log(data);
+        });
+    }
+}
+
+$('.save-group button').each(function(index, btn) {
+    $(btn).on('click', function() {
+        console.log("save button");
+        var uri = $(btn).parent().parent().parent().attr("uri");
+        if(uri == current.uri && current.action != "View") {
+            console.log(current.action);
+            update_flag(current.uri, current.action);
+        }
+    });
+}); 
+
+
+// allow actions dropdown to overflow from table
+$('.table-responsive').on('show.bs.dropdown', function () {
+     $('.table-responsive').css( "overflow", "inherit" );
+});
+$('.table-responsive').on('hide.bs.dropdown', function () {
+     $('.table-responsive').css( "overflow", "auto" );
+})
+
 </script>
 
 {% endblock %}
