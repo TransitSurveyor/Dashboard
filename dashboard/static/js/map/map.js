@@ -20,7 +20,8 @@ var styles = {
         fillOpacity: 1
     },
     tadDefault:{
-        fillColor:this.tadColor,
+       // fillColor:this.tadColor,
+        fillColor:'#B7BDF4',
         color:'#595959',
         weight:3,
         dashArray:'2 6',
@@ -35,7 +36,9 @@ var styles = {
         fillOpacity: 0.2
     },
     _defaultStyle:{
-        fillColor:this.tadColor,
+        //fillColor:this.tadColor,
+        fillColor:'#B7BDF4',
+
         color:'#595959',
         weight:3,
         dashArray:'2 6',
