@@ -199,71 +199,104 @@ class Routes(Base):
     def __repr__(self):
         return '<Routes: %r %r>' % (self.rte, self.rte_desc)
 
+class StopsODK(Base):
+    __tablename__ = 'stops'
+    __table_args__ = {"schema":"tm"}
+    gid = Column(Integer, primary_key = True)
+    rte = Column(SmallInteger)
+    rte_desc = Column(Text)
+    dir = Column(SmallInteger)
+    dir_desc = Column(Text)
+    stop_name = Column(Text)
+    stop_seq = Column(Integer)
+    stop_id = Column(Integer)
+    geom = Column(Geometry(geometry_type='POINT', srid=2913))
+
+    def __repr__(self):
+        return '<Stops: %r %r>' % (self.stop_id, self.stop_name)
+
 
 class SurveysCore(Base):
     __tablename__ = 'survey' 
-    uri = Column(String, ForeignKey("survey_flags.uri"), primary_key=True)
-    flags = relationship("SurveysFlag", foreign_keys=uri)
+    __table_args__ = {"schema":"odk"}
+    uri = Column(String, primary_key=True)
+    
     user_id = Column(String)
-    deviceid = Column(Text)
+    deviceid = Column(String)
+    srv_date = Column(String)
     start_time = Column(DateTime)
     end_time = Column(DateTime)
-    rte = Column(Text, nullable=False)
-    dir = Column(Text, nullable=False)
-    english = Column(Text)
-    other_lng = Column(Text)
-    orig_purpose = Column(Text)
-    orig_purpose_other = Column(Text)
+    
+    rte = Column(Integer)
+    dir = Column(Integer)
+    
+    english = Column(Boolean)
+    other_lng = Column(Integer)
+    
     orig_geom = Column(Geometry(geometry_type='POINT', srid=2913))
-    orig_access = Column(Text)
-    orig_access_other = Column(Text)
+    orig_purpose = Column(Integer)
+    orig_purpose_other = Column(String)
+    orig_access = Column(Integer)
+    orig_access_other = Column(String)
     orig_blocks = Column(Integer)
-    orig_parking = Column(Text)
-    dest_purpose = Column(Text)
-    dest_purpose_other = Column(Text)
+    orig_parking = Column(String)
+    
     dest_geom = Column(Geometry(geometry_type='POINT', srid=2913))
-    dest_egress = Column(Text)
-    dest_egress_other = Column(Text)
+    dest_purpose = Column(Integer)
+    dest_purpose_other = Column(String)
+    dest_egress = Column(Integer)
+    dest_egress_other = Column(String)
     dest_blocks = Column(Integer)
-    dest_parking = Column(Text)
-    board_id = Column(Integer, ForeignKey("tm_route_stops.gid"), nullable=True)
-    alight_id = Column(Integer, ForeignKey("tm_route_stops.gid"), nullable=True)
-    board = relationship("Stops", foreign_keys=board_id)
-    alight = relationship("Stops", foreign_keys=alight_id)
-    t_before = Column(Text)
-    before_rte1 = Column(Text)
-    before_rte2 = Column(Text)
-    before_rte3 = Column(Text)
-    t_after = Column(Text)
-    after_rte1 = Column(Text)
-    after_rte2 = Column(Text)
-    after_rte3 = Column(Text)
-    stcar_fare = Column(Text)
-    stcar_fare_other = Column(Text)
-    churn = Column(Text)
-    churn_other = Column(Text)
-    reason = Column(Text)
-    license = Column(Text)
+    dest_parking = Column(String)
+    
+    board_id = Column(Integer, ForeignKey("tm.stops.gid"), nullable=True)
+    alight_id = Column(Integer, ForeignKey("tm.stops.gid"), nullable=True)
+    
+    board = relationship("StopsODK", foreign_keys=board_id)
+    alight = relationship("StopsODK", foreign_keys=alight_id)
+    
+    route1 = Column(String)
+    route2 = Column(String)
+    route3 = Column(String)
+    route4 = Column(String)
+    route5 = Column(String)
+    
+    #loc_valid = Column(String)
+    
+    reverse_trip = Column(Boolean)
+    reverse_time = Column(DateTime)
+    stcar_fare = Column(Integer)
+    stcar_fare_other = Column(String)
+    churn = Column(Integer)
+    churn_other = Column(String)
+    reason = Column(Integer)
+    
+    license = Column(Boolean)
     house_no = Column(Integer)
     wrk_out_house = Column(Integer)
     wrk_veh = Column(Integer)
-    race = Column(Text)
-    race_other = Column(Text)
-    income = Column(Text)
-    addit_lng = Column(Text)
-    #other_lng_other = Column(Text)
-    engl_prof = Column(Text)
+    race = Column(Integer)
+    race_other = Column(String)
+    income = Column(Integer)
+    addit_lng = Column(Boolean)
+    engl_prof = Column(Integer)
+   
+    call_name = Column(String)
+    call_number = Column(String)
+    call_time = Column(String)
+    call_spanish = Column(String)
+    call_comment = Column(String)
     
     def __repr__(self):
-        return '<Survey: uri:%r, rte:%r, dir:%r>' %\
-            (self.uri, self.rte, self.dir)
+        return '<Survey: uri:%r, rte:%r, dir:%r>' % \
+            (self.uri, self.user_id, elf.rte, self.dir)
 
-class SurveysFlag(Base):
-    __tablename__ = 'survey_flags'
-    uri = Column(String, primary_key=True)
-    english = Column(Boolean)
-    locations = Column(Boolean)
-    valid_count = Column(Integer)
+#class SurveysFlag(Base):
+#    __tablename__ = 'survey_flags'
+#    uri = Column(String, primary_key=True)
+#    english = Column(Boolean)
+#    locations = Column(Boolean)
+#    valid_count = Column(Integer)
 
 
 """

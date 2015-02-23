@@ -1,0 +1,221 @@
+{% extends "long/base.html" %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+<script src="../static/js/map/basic_map.js"></script>
+{% endblock %}
+
+
+{% block dashboard %}
+
+{{ super() }}
+<div class="row-fluid">
+  <div class="col-md-12"> 
+    <div class="table-responsive panel panel-default">
+      <table class="table table-striped">
+      <thead id="thead">
+        <tr>
+        {% for header in headers %}
+        <th>{{ header }}</th>
+        {% endfor %}
+        </tr>
+        </thead>
+      <tbody id="tbody">
+        {% for callback in callbacks %}
+        <tr uri="{{ callback["uri"] }}">
+          <td>
+<div class="save-group btn-group" role="form">
+  <button type="button"
+      class="save-button btn btn-default dropdown-toggle"
+      data-toggle="dropdown">Save</button>
+</div>
+          </td>
+          <td>
+<div class="status-group btn-group" role="form">
+  <button type="button"
+      class="status-button btn btn-default dropdown-toggle"
+      data-toggle="dropdown">&nbsp;<span class="caret"></span>
+  </button>
+  <ul class="status-dropdown dropdown-menu scrollable-menu" role="menu">
+    <li><a href="#">&nbsp;</a></li>
+    <li><a href="#">Call</a></li>
+    <li><a href="#">Completed</a></li>
+    <li><a href="#">No Answer</a></li>
+    <li><a href="#">Declined</a></li>
+    <li><a href="#">Bad Number</a></li>
+    <li><a href="#">Delete</a></li>
+  </ul>
+</div>
+          </td>
+          <td>{{ callback["date"] }}</td>
+          <td>{{ callback["time"] }}</td>
+          <td>{{ callback["rte"] }}</td>
+          <td>{{ callback["dir"] }}</td>
+          <td>{{ callback["name"] }}</td>
+          <td>{{ callback["number"] }}</td>
+          <td>{{ callback["calltime"] }}</td>
+          <td>{{ callback["spanish"] }}</td>
+          <td>{{ callback["comment"] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      </table>
+    </div>
+  </div>
+   <!--div class="col-md-8">
+    <div id="map" style="width: auto; display:block; height:70vh"></div>
+  </div-->
+</div>
+<div class="row-fluid">
+  <div class="col-md-4"> 
+    <div class="table-responsive panel panel-default">
+      <table class="table table-striped">
+      <thead id="thead">
+        <tr>
+          <th colspan="2">General</th>
+        </tr>
+        </thead>
+      <tbody id="response-body-gen">
+      </tbody>
+      </table>
+    </div> 
+    <div class="table-responsive panel panel-default">
+      <table class="table table-striped">
+      <thead id="thead-orig">
+        <tr>
+          <th colspan="2">Origin</th>
+        </tr>
+        </thead>
+      <tbody id="response-body-orig">
+      </tbody>
+      </table>
+    </div>
+    <div class="table-responsive panel panel-default">
+      <table class="table table-striped">
+      <thead id="thead-dest">
+        <tr>
+          <th colspan="2">Destination</th>
+        </tr>
+        </thead>
+      <tbody id="response-body-dest">
+      </tbody>
+      </table>
+    </div>
+    <div class="table-responsive panel panel-default">
+      <table class="table table-striped">
+      <thead id="thead-tm">
+        <tr>
+          <th colspan="2">On-Off / Routes</th>
+        </tr>
+        </thead>
+      <tbody id="response-body-tm">
+      </tbody>
+      </table>
+    </div>
+    <div class="table-responsive panel panel-default">
+      <table class="table table-striped">
+      <thead id="thead-survey">
+        <tr>
+          <th colspan="2">Survey</th>
+        </tr>
+        </thead>
+      <tbody id="response-body-survey">
+      </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div id="map" style="width: auto; display:block; height:80vh"></div>
+  </div>
+</div>
+
+
+<script>
+var map = initBasicMap('map');
+var points = L.geoJson().addTo(map);
+
+
+$('.status-dropdown').each(function(index, item) {
+    var button = $(item).parent().find(".status-button");
+    $(item).find("a").each(function (index, item) {
+        $(item).on('click', function() {
+            // set button text with option is selected from dropdown list
+            button.text(item.text+" ").append('<span class="caret"></span>');
+            var row = $(item).parents().eq(4); //.parent().parent().parent().parent();
+            $('tbody').each(function(){
+                if($(this).attr('id').match(/response-body-.*/)) {
+                    $(this).empty();    
+                }
+            });
+            //if(item.text == "&nbsp;") {
+            //    console.log("empty");
+           // }
+            if(item.text == "Call") {
+                var uri = row.attr("uri");
+                console.log(uri);
+                $.getJSON("_survey", { uri:uri }, function(data, textStatus) {
+                    //$("#response-body-
+                    var table = null;
+                    $('tbody').each(function(){
+                        if($(this).attr('id').match(/response-body-.*/)) {
+                            $(this).empty();    
+                        }
+                    });
+                    points.clearLayers();
+                    var newPoints = 0;
+                    $(data.data).each(function(index, item) {
+                        var table = null;
+                        if(index >= 1 && index <= 4) {
+                            try {
+                                points.addData(JSON.parse(item.value));
+                                newPoints++;
+                            }
+                            catch(err) {}
+                        }
+                        else if (index >= 7) {
+                            if(index ==  7 || index == 8) {
+                                table = $("#response-body-gen");
+                            }
+                            else if(index >= 9 && index <= 14) {
+                                table = $("#response-body-orig");
+                            }
+                            else if(index >= 15 && index <= 20) {
+                                table = $("#response-body-dest");
+                            }   
+                            else if(index >= 21 && index <= 29) {
+                                table = $("#response-body-tm");
+                            }
+                            else if(index >= 30 && index <= 46) {
+                                table = $("#response-body-survey");
+                            } 
+                            if (table != null) {
+                                var row = $("<tr>");
+                                row.append($("<td>").text(item.field));
+                                row.append($("<td>").text(item.value));
+                                table.append(row);
+                            }
+                        }
+                    });
+                    if(newPoints > 0) {
+                        map.fitBounds(points.getBounds().pad(0.15));
+                    }
+                });
+            } 
+            
+        });
+    });
+    
+    //$(item).on('click', function() {
+    //    console.log("hello");
+    //});
+});    
+    //var choice = this.text;
+    //console.log(choice);
+    //console.log($(this).parents().eq(2).child().text);
+
+    //.text(this.text+' ').append('<span class="caret"></span>');
+</script>
+
+{% endblock %}

@@ -7,9 +7,11 @@ from sqlalchemy.orm import aliased
 from geoalchemy2 import functions as geofunc
 
 from dashboard import Session, debug, error
-from ..shared.models import Stops, Routes, SurveysCore, SurveysFlag
+from ..shared.models import Stops, SurveysCore
+#from ..shared.models import Stops, Routes, SurveysCore, #SurveysFlag
 from ..shared.helper import Helper
 
+import fields as F
 
 STATIC_DIR = '/long'
 mod_long = Blueprint('long', __name__, url_prefix='/long')
@@ -68,8 +70,9 @@ def map():
     query = session.query(SurveysCore)
     for record in query:
         #TODO check that survey has not already been flagged by user
-        if record.flags.locations:
-            keys.append(record.uri)
+        debug(record.uri)
+        #if record.flags.locations:
+        keys.append(record.uri)
     session.close()
     return render_template(static('map.html'), keys=keys)
 
@@ -77,12 +80,138 @@ def map():
 @mod_long.route('/_geoquery', methods=['GET'])
 def geo_query():
     points,lines = None, None
+    debug(request.args)
     if 'uri' in request.args:
         uri = request.args.get('uri')
         data = query_locations(uri)
         debug(data)
     return jsonify({'data':data})
     #return jsonify({'points':points, 'lines':lines})
+
+
+@mod_long.route('/callback')
+def callback():
+    data = []
+    headers = [
+        "Save", "Status", "Date", "Time", "Route", "Direction",
+        "Name", "Number", "Call Time", "Spanish", "Comment"]
+    session = Session()
+    query = session.query(
+        SurveysCore.uri,
+        SurveysCore.srv_date,
+        SurveysCore.start_time,
+        SurveysCore.rte,
+        SurveysCore.dir,
+        SurveysCore.call_name,
+        SurveysCore.call_number,
+        SurveysCore.call_time,
+        SurveysCore.call_spanish,
+        SurveysCore.call_comment
+    ).order_by(SurveysCore.srv_date, SurveysCore.start_time)\
+    .filter(SurveysCore.call_number != None)
+
+    callbacks = []
+    for record in query:
+        #debug(record)
+        callbacks.append({
+            "uri":record.uri,
+            "date":record.srv_date,
+            "time":record.start_time,
+            "rte":record.rte,
+            "dir":record.dir,
+            "name":record.call_name,
+            "number":record.call_number,
+            "calltime":record.call_time,
+            "comment":record.call_comment,
+            "spanish":record.call_spanish
+        })
+    session.close()
+    return render_template(
+        static('callback.html'),
+        headers=headers,
+        callbacks=callbacks)
+
+def convert_val(i, val):
+    if i in [9, 15] and val:
+        val = F.LOC_TYPE[val]
+    elif i == 11 and val:
+        val = F.ACCESS[val]
+    elif i == 17 and val:
+        debug(val)
+        val = F.EGRESS[val]
+    elif i == 31 and val:
+        val = val.strftime("%I:%M %p")
+        debug(type(val))
+    elif i == 32 and val:
+        val = F.STCAR_FARE[val]
+    elif i == 34 and val:
+        val = F.CHURN[val]
+    elif i == 36 and val:
+        val = F.REASON[val]
+    elif i == 41 and val:
+        val = F.RACE[val]
+    elif i == 43 and val:
+        val = F.INCOME[val]
+    elif i == 46 and val:
+        val = F.ENGL_PROF[val]
+    if not val and val != 0: val = ''
+    return val
+
+@mod_long.route('/viewer')
+def viewer():
+    data = []
+    headers = [
+        "Save", "Option", "Date", "Time", "User", "Route", "Direction"
+    ]
+    session = Session()
+    query = session.query(
+        SurveysCore.uri,
+        SurveysCore.srv_date,
+        SurveysCore.start_time,
+        SurveysCore.user_id,
+        SurveysCore.rte,
+        SurveysCore.dir
+    ).order_by(SurveysCore.srv_date, SurveysCore.start_time)\
+    .filter(SurveysCore.call_number == None)\
+    .limit(5)
+    
+    callbacks = []
+    for record in query:
+        #debug(record)
+        callbacks.append({
+            "uri":record.uri,
+            "date":record.srv_date,
+            "time":record.start_time,
+            "user":record.user_id,
+            "rte":record.rte,
+            "dir":record.dir
+        })
+    session.close()
+    return render_template(
+        static('viewer.html'),
+        headers=headers,
+        callbacks=callbacks)
+
+@mod_long.route('/_survey', methods=['GET'])
+def survey_data():
+    data = []
+    if 'uri' in request.args:
+        uri = request.args.get('uri')
+        session = Session()
+        fields_res = session.execute("""
+            SELECT ordinal_position, column_name
+            FROM information_schema.columns
+            WHERE table_schema = 'web' AND table_name   = 'callback';""")
+        fields = [ f[1] for f in fields_res ]
+        query = session.execute("""
+            SELECT * FROM web.callback
+            WHERE uri = :uri;""", {"uri":uri})
+        for record in query:
+            for index, field in enumerate(fields):
+                value = convert_val(index, record[index])
+                data.append({"field":field, "value":value})
+        session.close()
+    return jsonify({'data':data})
 
 """
 def transfers(query):
