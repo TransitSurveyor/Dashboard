@@ -3,7 +3,7 @@ import csv, os
 from sqlalchemy import func, desc, distinct, cast, Integer
 from flask import current_app
 
-from dashboard import Session, debug
+from dashboard import SessionONOFF as Session, debug
 
 app = current_app
 

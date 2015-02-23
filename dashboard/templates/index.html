@@ -2,36 +2,25 @@
 
 {% block nav_links %}
 <li><a href="{{ url_for('onoff.index') }}">On and Off</a></li>
-<!-- change below to 'long.index' when that blueprint is enabled -->
-<li><a href="{{ url_for('index') }}">Intercept</a></li>
+<li><a href="{{ url_for('long.index') }}">Intercept</a></li>
 {% endblock %}
 
 
 {% block dashboard %}
-<h3 class="page-header">On and Off</h3>
+<h3 class="page-header">Dashboard</h3>
+
 <ul class="nav nav-pills nav-justified">
   <li role="presentation">
-    <a class="pull-left" href="{{ url_for('onoff.status') }}">Status</a>
+    <a class="pull-left" href="{{ url_for('onoff.index') }}">On and Off</a>
   </li>
 </ul>
 
 <ul class="nav nav-pills nav-justified">
   <li role="presentation">
-    <a class="pull-left" href="{{ url_for('onoff.surveyor_status') }}">Surveyors</a>
+    <a class="pull-left" href="{{ url_for('long.index') }}">Intercept</a>
   </li>
 </ul>
 
-<ul class="nav nav-pills nav-justified">
-  <li role="presentation">
-    <a class="pull-left" href="{{ url_for('onoff.data') }}">Data</a>
-  </li>
-</ul>
-
-<ul class="nav nav-pills nav-justified">
-  <li role="presentation">
-    <a class="pull-left" href="{{ url_for('onoff.map') }}">Map</a>
-  </li>
-</ul>
 {% endblock %}
 
 

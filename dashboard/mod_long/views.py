@@ -6,10 +6,8 @@ from sqlalchemy import func
 from sqlalchemy.orm import aliased
 from geoalchemy2 import functions as geofunc
 
-from functools import wraps
-from flask import Response
-
-from dashboard import Session, debug, error
+from dashboard import SessionODK as Session
+from dashboard import debug, error
 from ..shared.models import Stops, SurveysCore, CallbackFlag as CFlag
 from ..shared.helper import Helper
 from auth import Auth
@@ -19,14 +17,13 @@ import fields as F
 STATIC_DIR = '/long'
 mod_long = Blueprint('long', __name__, url_prefix='/long')
 
-
 def static(html, static=STATIC_DIR):
     """returns correct path to static directory"""
     return os.path.join(static, html)
 
 @mod_long.route('/')
 def index():
-    return redirect(url_for('.map'))
+    return render_template(static('index.html'))
 
 def query_locations(uri):
     ret_val = {}
@@ -146,6 +143,8 @@ def convert_val(i, val):
 
 @mod_long.route('/viewer')
 def viewer():
+    error("test")
+    Auth.check_auth("blah", "pw")
     data = []
     headers = [
         "Save", "Option", "Date", "Time", "User", "Route", "Direction"

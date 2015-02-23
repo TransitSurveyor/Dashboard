@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import Response, request
-from dashboard import app
+from dashboard import app, error
 
 class Auth(object):
     @staticmethod
@@ -17,6 +17,7 @@ class Auth(object):
 
     @staticmethod
     def requires_auth(f):
+        error("checking auth")
         @wraps(f)
         def decorated(*args, **kwargs):
             auth = request.authorization
@@ -24,5 +25,4 @@ class Auth(object):
                 return Auth.authenticate()
             return f(*args, **kwargs)
         return decorated
-
 

@@ -3,7 +3,7 @@ import json
 
 from flask import current_app
 from dashboard import db
-from dashboard import Session
+from dashboard import SessionONOFF as Session
 from dashboard import debug
 
 app = current_app

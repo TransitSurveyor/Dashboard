@@ -10,7 +10,8 @@ from sqlalchemy import func
 
 from models import Scans, OnOffPairs_Scans, OnOffPairs_Stops
 from helper import Helper
-from dashboard import debug, error, Session
+from dashboard import debug, error
+from dashboard import SessionONOFF as Session
 from ..shared.helper import Helper as h
 
 STATIC_DIR = '/onoff'
@@ -23,16 +24,11 @@ def static(html, static=STATIC_DIR):
 
 @mod_onoff.route('/')
 def index():
-    return redirect(url_for('.surveyor_status'))
+    return render_template(static('index.html'))
 
-"""
-@mod_onoff.route('/test')
-def test():
-    return "hilogg"
-"""
-@mod_onoff.route('/overview')
-def overview():
-    return render_template(static('base.html'))
+#@mod_onoff.route('/overview')
+#def overview():
+#    return render_template(static('base.html'))
 
 @mod_onoff.route('/status')
 def status():
