@@ -6,9 +6,13 @@ from sqlalchemy import func
 from sqlalchemy.orm import aliased
 from geoalchemy2 import functions as geofunc
 
+from functools import wraps
+from flask import Response
+
 from dashboard import Session, debug, error
 from ..shared.models import Stops, SurveysCore, CallbackFlag as CFlag
 from ..shared.helper import Helper
+from auth import Auth
 
 import fields as F
 
@@ -19,7 +23,6 @@ mod_long = Blueprint('long', __name__, url_prefix='/long')
 def static(html, static=STATIC_DIR):
     """returns correct path to static directory"""
     return os.path.join(static, html)
-
 
 @mod_long.route('/')
 def index():
@@ -88,7 +91,9 @@ def geo_query():
     #return jsonify({'points':points, 'lines':lines})
 
 
+
 @mod_long.route('/callback')
+@Auth.requires_auth
 def callback():
     callbacks = []
     headers = [
@@ -107,46 +112,6 @@ def callback():
         for index, field in enumerate(fields):
             data[field] = record[index]
         callbacks.append(data) 
-   
-    debug(data)
-    session.close() 
-    #query = session.query(
-    #    SurveysCore.uri,
-    #    SurveysCore.srv_date,
-    #    SurveysCore.start_time,
-    #    SurveysCore.rte,
-    #    SurveysCore.dir,
-    #    SurveysCore.call_name,
-    #    SurveysCore.call_number,
-    #    SurveysCore.call_time,
-    #    SurveysCore.call_spanish,
-    #    SurveysCore.call_comment,
-    #    CFlag.flag
-    #).order_by(SurveysCore.srv_date, SurveysCore.start_time)\
-    #.join(CFlag.parent).filter(CFlag.flag == 0)
-
-    #callbacks = []
-    #for record in query:
-    #    debug(record.flag)
-    #    time = ''
-    #    call_time = ''
-    #    if record.start_time: time = record.start_time.strftime("%I:%M %p")
-    #    if record.call_time:
-    #        call_time = record.call_time.strftime("%I:%M %p")
-    #        if call_time == '12:00 PM': call_time = ''
-    #    callbacks.append({
-    #        "uri":record.uri,
-    #        "date":record.srv_date,
-    #        "time":time,
-    #        "rte":record.rte,
-    #        "dir":record.dir,
-    #        "name":record.call_name,
-    #        "number":record.call_number,
-    #        "calltime":call_time,
-    #        "comment":record.call_comment,
-    #        "spanish":record.call_spanish
-    #    })
-    
     session.close()
     return render_template(
         static('callback.html'),
@@ -252,6 +217,8 @@ def update_callback():
         session.commit()
         session.close()
     return jsonify(res=response)
+
+
 
 
 """
