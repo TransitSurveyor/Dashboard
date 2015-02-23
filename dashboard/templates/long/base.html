@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block nav_links %}
-<li><a href="/long/map">Map1</a></li>
-<li><a href="/long/map">Map2</a></li>
-<li><a href="/onoff">On and Off</a></li>
+<li><a href="{{ url_for('long.viewer') }}">Viewer</a></li>
+<li><a href="{{ url_for('long.callback') }}">Callbacks</a></li>
+<li><a href="{{ url_for('onoff.index') }}">On and Off</a></li>
 {% endblock %}
