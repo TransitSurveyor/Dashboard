@@ -172,6 +172,19 @@ function get_table(index) {
     return table;
 }
 
+function create_marker(field, data) {
+    var base = "../static/icons/";
+    var name = "";
+    switch (field) {
+        case "orig_geom": name = "start.png"; break;
+        case "dest_geom": name = "end.png"; break;
+        case "board_geom": name = "transit_green_30.png"; break;
+        case "alight_geom": name = "transit_red_30.png"; break;
+    } 
+    var icon = L.icon({iconUrl:base + name});
+    return L.marker([data.coordinates[1], data.coordinates[0]], {icon:icon}); 
+}
+
 function flagpick_listener(btn, item) {
     btn.text(item.text+" ").append('<span class="caret"></span>');
     var row = $(item).parents().eq(4);
@@ -195,7 +208,11 @@ function flagpick_listener(btn, item) {
                 var table = null;
                 if(index >= 1 && index <= 4) {
                     try {
-                        points.addData(JSON.parse(record.value));
+                        var point = JSON.parse(record.value);
+                        var marker = create_marker(record.field, point);
+                        //console.log(marker);
+                        //console.log(point);
+                        points.addLayer(marker);
                         newPoints++;
                     }
                     catch(err) {}
@@ -220,7 +237,7 @@ function flagpick_listener(btn, item) {
 }
 
 var map = initBasicMap('map');
-var points = L.geoJson().addTo(map);
+var points = L.featureGroup().addTo(map);
 var current = {uri:null, action:null};
 
 $('.status-dropdown').each(function(index, item) {
@@ -247,30 +264,25 @@ function get_flag(action) {
 
 function update_flag(uri, action) {
     var flag = get_flag(action); 
-    console.log(action);
-    console.log(flag);    
-    
     if(action == "Incomplete") return;
     var c = confirm("mark survey as " + action.toUpperCase());
     if (c == true) {
         $.post("_update_callback", {"uri":uri, "flag":flag}, function(data, success) {
-            console.log(success);
-            console.log(data);
+            if(success == "success") {
+                $("tr[uri='"+uri+"']").remove();
+            }
         });
     }
 }
 
 $('.save-group button').each(function(index, btn) {
     $(btn).on('click', function() {
-        console.log("save button");
-        var uri = $(btn).parent().parent().parent().attr("uri");
+        var uri = $(btn).parents().eq(2).attr("uri");
         if(uri == current.uri && current.action != "View") {
-            console.log(current.action);
             update_flag(current.uri, current.action);
         }
     });
 }); 
-
 
 // allow actions dropdown to overflow from table
 $('.table-responsive').on('show.bs.dropdown', function () {
