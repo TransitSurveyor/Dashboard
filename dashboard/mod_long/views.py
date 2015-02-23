@@ -201,8 +201,17 @@ def survey_data():
         fields_res = session.execute("""
             SELECT ordinal_position, column_name
             FROM information_schema.columns
-            WHERE table_schema = 'web' AND table_name   = 'callback';""")
+            WHERE table_schema = 'web' AND table_name   = 'callback'
+            ORDER BY ordinal_position;""")
         fields = [ f[1] for f in fields_res ]
+        
+        select = ""
+        for index, field in enumerate(fields):
+            if index != len(field) - 2:
+                select += field + ", "
+            else:
+                select += field
+        debug(select)
         query = session.execute("""
             SELECT * FROM web.callback
             WHERE uri = :uri;""", {"uri":uri})
