@@ -133,7 +133,10 @@
     var data = {{ data|tojson|safe }};
     var summary = {{ summary|tojson|safe }};
 
+    console.log(routes);
+    console.log(data);
     console.log(summary);
+
     var streetcar = {{ streetcar|tojson|safe }};
     var times = ['AM Peak', 'Midday', 'PM Peak', 'Evening'];
 

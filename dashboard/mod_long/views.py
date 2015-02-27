@@ -228,6 +228,20 @@ def update_callback():
     return jsonify(res=response)
 
 
+@mod_long.route('/status')
+def status():
+    # TODO return routes list dynamically
+    return render_template(static('status.html'))
+
+@mod_long.route('/status/_data', methods=['GET'])
+def status_data():
+    data = []
+    if 'rte_desc' in request.args:
+        rte_desc = request.args.get('rte_desc')
+        debug(rte_desc)
+        #session = Session()
+        #session.close()
+    return jsonify({'data':data})
 
 
 """

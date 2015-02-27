@@ -107,6 +107,7 @@
     //into lookup object
     //{rte_desc:{0:<outbound dir_desc>, 1:<inbound dir_desc>}, ... }
     var directions = {{ directions|tojson|safe }};
+    console.log(directions);
     var users = {{ users|tojson|safe }}; 
     console.log(users); 
     

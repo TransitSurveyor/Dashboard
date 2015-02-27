@@ -28,30 +28,30 @@
         {% for callback in callbacks %}
         <tr uri="{{ callback["uri"] }}">
           <td>
-<div class="save-group btn-group" role="form">
-  <button type="button"
-      class="save-button btn btn-default dropdown-toggle"
-      data-toggle="dropdown">Save</button>
-</div>
+            <div class="save-group btn-group" role="form">
+              <button type="button"
+                class="save-button btn btn-default dropdown-toggle"
+                data-toggle="dropdown">Save</button>
+            </div>
           </td>
           <td>
-<div class="status-group btn-group" role="form">
-  <button type="button"
-      class="status-button btn btn-default dropdown-toggle"
-      data-toggle="dropdown">&nbsp;<span class="caret"></span>
-  </button>
-  <ul class="status-dropdown dropdown-menu scrollable-menu" role="menu">
-    <li role="presentation"><a href="#">View</a></li>
-    <li role="presentation" class="divider"></li>
-    <li role="presentation" class="dropdown-header">Actions</li>
-    <li><a href="#">Incomplete</a></li>
-    <li><a href="#">Completed</a></li>
-    <li><a href="#">No Answer</a></li>
-    <li><a href="#">Declined</a></li>
-    <li><a href="#">Bad Number</a></li>
-    <li><a href="#">Remove (Other)</a></li>
-  </ul>
-</div>
+            <div class="status-group btn-group" role="form">
+            <button type="button"
+              class="status-button btn btn-default dropdown-toggle"
+              data-toggle="dropdown">&nbsp;<span class="caret"></span>
+            </button>
+              <ul class="status-dropdown dropdown-menu scrollable-menu" role="menu">
+                <li role="presentation"><a href="#">View</a></li>
+                <li role="presentation" class="divider"></li>
+                <li role="presentation" class="dropdown-header">Actions</li>
+                <li><a href="#">Incomplete</a></li>
+                <li><a href="#">Completed</a></li>
+                <li><a href="#">No Answer</a></li>
+                <li><a href="#">Declined</a></li>
+                <li><a href="#">Bad Number</a></li>
+                <li><a href="#">Remove (Other)</a></li>
+              </ul>
+            </div>
           </td>
           <td>{{ callback["srv_date"] }}</td>
           <td>{{ callback["start_time"] }}</td>
