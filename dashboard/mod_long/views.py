@@ -25,6 +25,7 @@ def static(html, static=STATIC_DIR):
 def index():
     return render_template(static('index.html'))
 
+"""
 def query_locations(uri):
     ret_val = {}
     On = aliased(Stops)
@@ -48,7 +49,7 @@ def query_locations(uri):
         ret_val["on_geom"] = json.loads(record.on_geom)
         ret_val["off_geom"] = json.loads(record.off_geom)
     return ret_val
-    
+ 
 
 def check_flags(record):
     if not record.flags.english:
@@ -56,7 +57,7 @@ def check_flags(record):
     if not record.flags.locations:
         return False
     return True
-
+"""
 
 """
 Filter by route and direction
@@ -116,27 +117,25 @@ def callback():
         callbacks=callbacks)
 
 def convert_val(i, val):
-    if i in [9, 15] and val:
+    if i in [11, 17] and val:
         val = F.LOC_TYPE[val]
-    elif i == 11 and val:
+    elif i == 13 and val:
         val = F.ACCESS[val]
-    elif i == 17 and val:
-        debug(val)
+    elif i == 20 and val:
         val = F.EGRESS[val]
-    elif i == 31 and val:
+    elif i == 35 and val:
         val = val.strftime("%I:%M %p")
-        debug(type(val))
-    elif i == 32 and val:
-        val = F.STCAR_FARE[val]
-    elif i == 34 and val:
-        val = F.CHURN[val]
     elif i == 36 and val:
+        val = F.STCAR_FARE[val]
+    elif i == 38 and val:
+        val = F.CHURN[val]
+    elif i == 40 and val:
         val = F.REASON[val]
-    elif i == 41 and val:
+    elif i == 45 and val:
         val = F.RACE[val]
-    elif i == 43 and val:
+    elif i == 47 and val:
         val = F.INCOME[val]
-    elif i == 46 and val:
+    elif i == 50 and val:
         val = F.ENGL_PROF[val]
     if not val and val != 0: val = ''
     return val
@@ -194,11 +193,22 @@ def survey_data():
         survey = session.execute("""
             SELECT * FROM web.callback
             WHERE uri = :uri;""", {"uri":uri}).first()
+        lng = session.execute("""
+            SELECT choice FROM odk.lng
+            WHERE survey_uri = :uri;""", {"uri":uri})
+        
         if survey:
             fields = [ f[1] for f in fields ]
             for index, field in enumerate(fields):
                 value = convert_val(index, survey[index])
                 data.append({"field":field, "value":value})
+            lngsData = {"field":"other_lngs", "value":""}
+            lngs = []
+            if lng:
+                for record in lng:
+                    if record[0]: lngs.append(F.LNG[record[0]])
+            lngsData["value"] = ", ".join(lngs)
+            data.insert(-2, lngsData)
         session.close()
     return jsonify({'data':data})
 

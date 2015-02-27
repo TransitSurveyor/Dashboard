@@ -17,7 +17,6 @@ class Auth(object):
 
     @staticmethod
     def requires_auth(f):
-        error("checking auth")
         @wraps(f)
         def decorated(*args, **kwargs):
             auth = request.authorization

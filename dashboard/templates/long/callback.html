@@ -164,11 +164,11 @@ function clear_tables() {
 
 function get_table(index) {
     var table = null;
-    if(index ==  7 || index == 8) table = $("#response-body-gen");
-    else if(index >= 9 && index <= 14) table = $("#response-body-orig");
-    else if(index >= 15 && index <= 20) table = $("#response-body-dest");
-    else if(index >= 21 && index <= 29) table = $("#response-body-tm");
-    else if(index >= 30 && index <= 46) table = $("#response-body-survey");
+    if(index >=  7 && index <= 10) table = $("#response-body-gen");
+    else if(index >= 11 && index <= 17) table = $("#response-body-orig");
+    else if(index >= 18 && index <= 24) table = $("#response-body-dest");
+    else if(index >= 25 && index <= 33) table = $("#response-body-tm");
+    else if(index >= 34) table = $("#response-body-survey");
     return table;
 }
 
@@ -181,7 +181,7 @@ function create_marker(field, data) {
         case "board_geom": name = "transit_green_30.png"; break;
         case "alight_geom": name = "transit_red_30.png"; break;
     } 
-    var icon = L.icon({iconUrl:base + name});
+    var icon = L.icon({iconUrl:base + name, iconAnchor:[15,30]});
     return L.marker([data.coordinates[1], data.coordinates[0]], {icon:icon}); 
 }
 
@@ -210,8 +210,6 @@ function flagpick_listener(btn, item) {
                     try {
                         var point = JSON.parse(record.value);
                         var marker = create_marker(record.field, point);
-                        //console.log(marker);
-                        //console.log(point);
                         points.addLayer(marker);
                         newPoints++;
                     }

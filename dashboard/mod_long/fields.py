@@ -96,4 +96,18 @@ ENGL_PROF = {
     3:"Not well"
 }
 
-
+LNG = {
+    1:"Spanish",
+    2:"Vietnamese",
+    3:"Chinese",
+    4:"Russian",
+    5:"Korean",
+    6:"Japanese",
+    7:"Ukrainian",
+    8:"Romanian",
+    9:"Tagalog",
+    10:"Arabic",
+    11:"Mon-Khmher, Cambodian",
+    12:"Somali",
+    13:"Hmong"
+}
