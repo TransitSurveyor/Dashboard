@@ -17,9 +17,17 @@
 
 <ul class="nav nav-pills nav-justified">
   <li role="presentation">
+    <a class="pull-left" href="{{ url_for('long.status') }}">Status</a>
+</li>
+</ul>
+
+<ul class="nav nav-pills nav-justified">
+  <li role="presentation">
     <a class="pull-left" href="{{ url_for('long.callback') }}">Callbacks</a>
   </li>
 </ul>
+
+
 
 {% endblock %}
 
