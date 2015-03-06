@@ -231,16 +231,70 @@ def update_callback():
 @mod_long.route('/status')
 def status():
     # TODO return routes list dynamically
-    return render_template(static('status.html'))
+    session = Session()
+    routes = session.execute("""
+        SELECT rte::varchar, rte_desc
+        FROM web.rtedesc_lookup
+        ORDER BY rte::integer""")
+
+    routes = [ (route[0],route[1]) for route in routes ]
+    status = session.execute("""
+        SELECT * 
+        FROM web.summary_status""")
+    summary = []
+    for s in status:
+        summary.append({
+            'bucket':str(s[0]),
+            'in_target':int(s[2]),
+            'in_complete':int(s[3]) if s[3] else 0,
+            'in_pct':float(s[4]) if s[4] else 0,
+            'out_target':int(s[5]),
+            'out_complete':int(s[6]) if s[6] else 0,
+            'out_pct':float(s[7]) if s[7] else 0
+        })
+    session.close()
+    return render_template(static('status.html'), routes=routes, summary=summary)
 
 @mod_long.route('/status/_data', methods=['GET'])
 def status_data():
-    data = []
-    if 'rte_desc' in request.args:
-        rte_desc = request.args.get('rte_desc')
-        debug(rte_desc)
-        #session = Session()
-        #session.close()
+    data = {}
+    if 'rte_desc' not in request.args: return jsonify({'data':data})
+    rte_desc = request.args.get('rte_desc')
+    session = Session()
+    routes = session.execute("""
+        SELECT
+            rte,
+            rte_desc,
+            in_dir,
+            in_dir_desc,
+            out_dir,
+            out_dir_desc
+        FROM
+            web.rtedesc_lookup
+        WHERE rte_desc = :rte_desc""", {'rte_desc':rte_desc}).first()
+    if not routes: return jsonify({'data':data})
+    data = {
+        'rte':routes[0],
+        'in_dir':routes[3],
+        'out_dir':routes[5],
+        'status':[]
+    }
+    status = session.execute("""
+        SELECT *
+        FROM web.rte_status
+        WHERE rte = :rte
+        ORDER BY bucket""", {'rte':routes[0]})
+    for s in status:
+        data['status'].append({
+            'bucket':str(s[1]),
+            'in_target':int(s[2]),
+            'in_complete':int(s[3]) if s[3] else 0,
+            'in_pct':float(s[4]) if s[4] else 0,
+            'out_target':int(s[5]),
+            'out_complete':int(s[6]) if s[6] else 0,
+            'out_pct':float(s[7]) if s[7] else 0
+        })
+    session.close()
     return jsonify({'data':data})
 
 
