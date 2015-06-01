@@ -1,7 +1,3 @@
-# Dashboard
-
-#### setup
-``` shell
 # clone project
 git clone https://github.com/TransitSurveyor/Dashboard.git
 cd Dashboard
@@ -16,11 +12,10 @@ env/bin/pip install -r requirements.txt
 # project uses 'config.py' as default config file
 cp example_config.py config.py
 
-```
+# ---------------------------------
+# deploying on apache with mod_wsgi
+# ---------------------------------
 
-
-#### Deploying on Apache with mod_wsgi
-
-1. create wsgi file
-2. create virtual host
-3. make wsgi file visible to apache user
+# 1. create wsgi file
+# 2. create virtual host
+# 3. make wsgi file visible to apache user
