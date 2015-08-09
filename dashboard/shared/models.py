@@ -1,3 +1,9 @@
+# Copyright (C) 2015 Jeffrey Meyers
+# This program is released under the "MIT License".
+# Please see the file COPYING in the source
+# distribution of this software for license terms.
+
+
 from sqlalchemy import Column, Integer, Numeric, SmallInteger, Text, String, Boolean
 from sqlalchemy import DateTime, Boolean, ForeignKey, create_engine
 from sqlalchemy.orm import relationship
