@@ -40,8 +40,7 @@ def status():
         FROM v.records
         WHERE rte_desc LIKE 'Portland Streetcar%'
         GROUP by rte_desc;""")
-    
-    # hardcode streetcar targets, then populate the count
+    #hardcode streetcar targets, then populate the count
     streetcar = {
             "Portland Streetcar - NS Line":{'target':2182, 'count':0},
             "Portland Streetcar - CL Line":{'target':766, 'count':0}
@@ -50,9 +49,7 @@ def status():
         debug(record)
         streetcar[record[0]]['count'] = int(record[1])
     web_session.close()
-   
     summary = Helper.query_routes_summary()
-    debug(summary) 
     return render_template(static('status.html'), 
             streetcar=streetcar, routes=routes, data=data, summary=summary)
 
