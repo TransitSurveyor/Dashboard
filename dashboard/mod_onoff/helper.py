@@ -335,6 +335,7 @@ class Helper(object):
         ret_val = {}
         
         for record in query:
+            if not record[0]: continue
             rte = int(record[0])
             rte_desc = record[1]
             dir = int(record[2])
