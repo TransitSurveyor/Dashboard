@@ -3,6 +3,7 @@
 {% block nav_links %}
 <li><a href="{{ url_for('onoff.index') }}">On and Off</a></li>
 <li><a href="{{ url_for('long.index') }}">Intercept</a></li>
+<li><a href="{{ url_for('fare.index') }}">Fare Survey</a></li>
 {% endblock %}
 
 
@@ -18,6 +19,12 @@
 <ul class="nav nav-pills nav-justified">
   <li role="presentation">
     <a class="pull-left" href="{{ url_for('long.index') }}">Intercept</a>
+  </li>
+</ul>
+
+<ul class="nav nav-pills nav-justified">
+  <li role="presentation">
+    <a class="pull-left" href="{{ url_for('fare.index') }}">Fare Survey</a>
   </li>
 </ul>
 

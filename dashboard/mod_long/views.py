@@ -10,7 +10,7 @@ from dashboard import SessionODK as Session
 from dashboard import debug, error
 from ..shared.models import Stops, SurveysCore, CallbackFlag as CFlag
 from ..shared.helper import Helper
-from auth import Auth
+from dashboard.auth import Auth
 
 import fields as F
 

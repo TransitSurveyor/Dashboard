@@ -1,0 +1,26 @@
+{% extends "dashboard_base.html" %}
+
+{% block nav_links %}
+<li><a href="{{ url_for('onoff.index') }}">On and Off</a></li>
+<li><a href="{{ url_for('long.index') }}">Intercept</a></li>
+<li><a href="{{ url_for('fare.index') }}">Fare Survey</a></li>
+{% endblock %}
+
+
+{% block dashboard %}
+<h3 class="page-header">Fare Survey Dashboard</h3>
+
+
+<ul class="nav nav-pills nav-justified">
+  <li role="presentation">
+    <a class="pull-left" href="{{ url_for('fare.reports') }}">Reports</a>
+</li>
+</ul>
+
+
+{% endblock %}
+
+
+
+
+

@@ -21,12 +21,12 @@ error = app.logger.error
 
 from dashboard.mod_onoff.views import mod_onoff as onoff_module
 from dashboard.mod_long.views import mod_long as long_module
+from dashboard.mod_fare.views import mod_fare as fare_module
 
 app.register_blueprint(onoff_module)
 app.register_blueprint(long_module)
+app.register_blueprint(fare_module)
 
 Bootstrap(app)
 
 from dashboard import views
-
-

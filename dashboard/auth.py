@@ -3,9 +3,10 @@ from flask import Response, request
 from dashboard import app, error
 
 class Auth(object):
+    
     @staticmethod
     def check_auth(username, password): 
-        return username == app.config["CALL_USER"] and password == app.config["CALL_PW"]
+        return username == app.config["ADMIN_USER"] and password == app.config["ADMIN_PW"]
 
     @staticmethod
     def authenticate():
